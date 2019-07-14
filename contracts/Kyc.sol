@@ -36,6 +36,7 @@ contract kyc {
     struct Request {
         string uname;
         address bankAddress;
+        bool isAllowed;
     }
 
 
@@ -71,8 +72,15 @@ contract kyc {
                 return;
             }
         }
+        // update the KYC count of the bank
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (allBanks[i].ethAddress == bankAddress) {
+                allBanks[i].KYC_count ++;
+                break;
+            }
+        }
         allRequests.length ++;
-        allRequests[allRequests.length - 1] = Request(Uname, bankAddress);
+        allRequests[allRequests.length - 1] = Request(Uname, bankAddress, true);
     }
     // function to remove request for KYC
     // @Params - Username for the customer
@@ -80,6 +88,13 @@ contract kyc {
     function removeRequest(string memory Uname) public payable returns (int) {
         for (uint i = 0; i < allRequests.length; ++i) {
             if (stringsEqual(allRequests[i].uname, Uname)) {
+                // update the KYC count of the bank
+                for (uint k = 0; k < allBanks.length; ++k) {
+                    if (allBanks[k].ethAddress == allRequests[i].bankAddress) {
+                        allBanks[k].KYC_count --;
+                        break;
+                    }
+                }
                 for (uint j = i + 1; j < allRequests.length; ++j) {
                     allRequests[i - 1] = allRequests[i];
                 }
@@ -87,7 +102,20 @@ contract kyc {
                 return 0;
             }
         }
-        // throw error if uname not found
+        // error if uname not found
+        return 1;
+    }
+    // function to allow bank to do KYC on a customer
+    // @Params - Username for the customer, ethAddress of the bank and bool - true if allowed else false
+    // @return - This function returns 0 if updation is successful else returns 1 if the request is not found
+    function allowBankForKyc(string memory Uname, address bankEthAddress, bool isAllowed) public onlyAdmin payable returns (int) {
+        for (uint i = 0; i < allRequests.length; ++i) {
+            if (allRequests[i].bankAddress == bankEthAddress && stringsEqual(allRequests[i].uname, Uname)) {
+                allRequests[i].isAllowed = isAllowed;
+                return 0;
+            }
+        }
+        // error if uname not found
         return 1;
     }
     // function to get all request given by a bank
@@ -159,16 +187,22 @@ contract kyc {
                 return 0;
             }
         }
-        // throw error if uname not found
+        // error if uname not found
         return 1;
     }
     // function to return customer profile data
-    // @params - Customer username is passed as the Parameters
+    // @params - Customer username is passed as the Parameters and password if required
     // @return - This function return the customer data if found, else this function returns an error string.
     function viewCustomer(string memory Uname) public payable returns (string memory) {
+        return viewCustomer(Uname, "null");
+    }
+    function viewCustomer(string memory Uname, string memory password) public payable returns (string memory) {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
-                return allCustomers[i].dataHash;
+                if (stringsEqual(allCustomers[i].password, password)) {
+                    return allCustomers[i].dataHash;
+                }
+                return "password missmatch";
             }
         }
         return "Customer not found in database!";
@@ -219,6 +253,17 @@ contract kyc {
                 return 0;
             }
         }
+        return 1;
+    }
+
+    function setPassword(string memory Uname, string memory password) public payable returns (uint) {
+        for (uint i = 0; i < allCustomers.length; ++i) {
+            if (stringsEqual(allCustomers[i].uname, Uname)) {
+                allCustomers[i].password = password;
+                return 0;
+            }
+        }
+        // error if uname not found
         return 1;
     }
 
@@ -323,12 +368,11 @@ contract kyc {
     }
 
 
-
     ///////////////////////////////////////////////////////
     // ALL PRIVATE FUNCTIONS //////////////////////////////
     ///////////////////////////////////////////////////////
 
-    // function to add request for KYC
+    // function to add request for KYC only if the bank is allowed
     // @Params - Username for the customer and bankAddress
     // Function is made payable as banks need to provide some currency to start of the KYC process
     function addKYC(string memory Uname, address bankAddress) public payable {
@@ -338,8 +382,15 @@ contract kyc {
                 return;
             }
         }
+        for (uint i = 0; i < allRequests.length; ++i) {
+            if (allRequests[i].bankAddress == bankAddress &&
+                stringsEqual(allRequests[i].uname, Uname) &&
+                !allRequests[i].isAllowed) {
+                return;
+            }
+        }
         validKYCs.length ++;
-        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress);
+        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress, true);
     }
     // function to remove from valid KYC
     // @Params - Username for the customer
