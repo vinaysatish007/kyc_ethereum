@@ -49,6 +49,11 @@ contract kyc {
     Request[] public validKYCs;
 
 
+
+    ///////////////////////////////////////////////////////
+    // ALL REQUEST FUNCTIONS //////////////////////////////
+    ///////////////////////////////////////////////////////
+
     // function to add request for KYC
     // @Params - Username for the customer and bankAddress
     // Function is made payable as banks need to provide some currency to start of the KYC process
@@ -78,52 +83,13 @@ contract kyc {
         // throw error if uname not found
         return 1;
     }
-    // function to add request for KYC
-    // @Params - Username for the customer and bankAddress
-    // Function is made payable as banks need to provide some currency to start of the KYC process
-    function addKYC(string memory Uname, address bankAddress) public payable {
-        for (uint i = 0; i < validKYCs.length; ++i) {
-            if (stringsEqual(validKYCs[i].uname, Uname) && validKYCs[i].bankAddress ==
-                bankAddress) {
-                return;
-            }
-        }
-        validKYCs.length ++;
-        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress);
-    }
-    // function to remove from valid KYC
-    // @Params - Username for the customer
-    // @return - This function returns 0 if removal is successful else this return 1 if the Username for the customer is not found
-    function removeKYC(string memory Uname) public payable returns (int) {
-        for (uint i = 0; i < validKYCs.length; ++i) {
-            if (stringsEqual(validKYCs[i].uname, Uname)) {
-                for (uint j = i + 1; j < validKYCs.length; ++j) {
-                    validKYCs[i - 1] = validKYCs[i];
-                }
-                validKYCs.length --;
-                return 0;
-            }
-        }
-        // throw error if uname not found
-        return 1;
-    }
-    // function to compare two string value
-    // This is an internal fucntion to compare string values
-    // @Params - String a and String b are passed as Parameters
-    // @return - This function returns true if strings are matched and false if the strings are not matching
-    function stringsEqual(string storage _a, string memory _b) internal view returns (bool) {
-        bytes storage a = bytes(_a);
-        bytes memory b = bytes(_b);
-        if (a.length != b.length)
-            return false;
-        // @todo unroll this loop
-        for (uint i = 0; i < a.length; i ++)
-        {
-            if (a[i] != b[i])
-                return false;
-        }
-        return true;
-    }
+
+
+    ///////////////////////////////////////////////////////
+    // ALL CUSTOMER FUNCTIONS /////////////////////////////
+    ///////////////////////////////////////////////////////
+
+
     // function to add a customer profile to the database
     // @params - Username and the hash of data for the customer are passed as parameters
     // returns 0 if successful
@@ -243,4 +209,61 @@ contract kyc {
     }
 
 
+    ///////////////////////////////////////////////////////
+    // ALL BANK FUNCTIONS /////////////////////////////////
+    ///////////////////////////////////////////////////////
+
+
+
+
+    ///////////////////////////////////////////////////////
+    // ALL PRIVATE FUNCTIONS //////////////////////////////
+    ///////////////////////////////////////////////////////
+
+    // function to add request for KYC
+    // @Params - Username for the customer and bankAddress
+    // Function is made payable as banks need to provide some currency to start of the KYC process
+    function addKYC(string memory Uname, address bankAddress) public payable {
+        for (uint i = 0; i < validKYCs.length; ++i) {
+            if (stringsEqual(validKYCs[i].uname, Uname) && validKYCs[i].bankAddress ==
+                bankAddress) {
+                return;
+            }
+        }
+        validKYCs.length ++;
+        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress);
+    }
+    // function to remove from valid KYC
+    // @Params - Username for the customer
+    // @return - This function returns 0 if removal is successful else this return 1 if the Username for the customer is not found
+    function removeKYC(string memory Uname) public payable returns (int) {
+        for (uint i = 0; i < validKYCs.length; ++i) {
+            if (stringsEqual(validKYCs[i].uname, Uname)) {
+                for (uint j = i + 1; j < validKYCs.length; ++j) {
+                    validKYCs[i - 1] = validKYCs[i];
+                }
+                validKYCs.length --;
+                return 0;
+            }
+        }
+        // throw error if uname not found
+        return 1;
+    }
+    // function to compare two string value
+    // This is an internal fucntion to compare string values
+    // @Params - String a and String b are passed as Parameters
+    // @return - This function returns true if strings are matched and false if the strings are not matching
+    function stringsEqual(string storage _a, string memory _b) internal view returns (bool) {
+        bytes storage a = bytes(_a);
+        bytes memory b = bytes(_b);
+        if (a.length != b.length)
+            return false;
+        // @todo unroll this loop
+        for (uint i = 0; i < a.length; i ++)
+        {
+            if (a[i] != b[i])
+                return false;
+        }
+        return true;
+    }
 }
