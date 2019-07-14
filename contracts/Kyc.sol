@@ -86,15 +86,15 @@ contract kyc {
     // function to get all request given by a bank
     // @Params - ethAddress of the bank
     // @return - List of all the requests
-//    function getRequestsOfBank(address memory ethAddress) public view returns (uint256[] memory) {
-//        uint256[] RequestsOfBank;
-//        for (uint i = 0; i < allRequests.length; ++i) {
-//            if (allRequests[i].bankAddress == ethAddress) {
-//                RequestsOfBank.push(allRequests[i].uname);
-//            }
-//        }
-//        return RequestsOfBank;
-//    }
+    //    function getRequestsOfBank(address memory ethAddress) public view returns (uint256[] memory) {
+    //        uint256[] RequestsOfBank;
+    //        for (uint i = 0; i < allRequests.length; ++i) {
+    //            if (allRequests[i].bankAddress == ethAddress) {
+    //                RequestsOfBank.push(allRequests[i].uname);
+    //            }
+    //        }
+    //        return RequestsOfBank;
+    //    }
 
 
     ///////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ contract kyc {
     }
     // function to return customer profile data
     // @params - Customer username is passed as the Parameters
-    // @return - This function return the cutomer data if found, else this function returns an error string.
+    // @return - This function return the customer data if found, else this function returns an error string.
     function viewCustomer(string memory Uname) public payable returns (string memory) {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
@@ -165,6 +165,27 @@ contract kyc {
             }
         }
         return "Customer not found in database!";
+    }
+    // function to return latest bank to update the customer data
+    // @params - Customer username is passed as the Parameters
+    // @return - This function return the customer data if found, else this function returns 0 address.
+    function viewHistoryForCustomer(string memory Uname) public payable returns (address) {
+        for (uint i = 0; i < allCustomers.length; ++i) {
+            if (stringsEqual(allCustomers[i].uname, Uname)) {
+                return allCustomers[i].bank;
+            }
+        }
+    }
+    // function to return latest bank to update the customer data
+    // @params - Customer username is passed as the Parameters
+    // @return - This function return the customer data if found, else this function returns 0.
+    function viewCustomerRating(string memory Uname) public payable returns (uint) {
+        for (uint i = 0; i < allCustomers.length; ++i) {
+            if (stringsEqual(allCustomers[i].uname, Uname)) {
+                return allCustomers[i].rating;
+            }
+        }
+        return 0;
     }
 
 
@@ -185,7 +206,7 @@ contract kyc {
                 }
                 else {
                     allCustomers[i].upvotes --;
-                    if (allCustomers[i].upvotes < 5) {
+                    if (allCustomers[i].upvotes <= 5) {
                         removeKYC(Uname);
                     }
                 }
