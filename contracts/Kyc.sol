@@ -1,4 +1,4 @@
-pragma solidity ^0.5.1;
+pragma solidity ^0.5.9;
 
 contract kyc {
     // Struct customer
@@ -83,6 +83,18 @@ contract kyc {
         // throw error if uname not found
         return 1;
     }
+    // function to get all request given by a bank
+    // @Params - ethAddress of the bank
+    // @return - List of all the requests
+//    function getRequestsOfBank(address memory ethAddress) public view returns (uint256[] memory) {
+//        uint256[] RequestsOfBank;
+//        for (uint i = 0; i < allRequests.length; ++i) {
+//            if (allRequests[i].bankAddress == ethAddress) {
+//                RequestsOfBank.push(allRequests[i].uname);
+//            }
+//        }
+//        return RequestsOfBank;
+//    }
 
 
     ///////////////////////////////////////////////////////
