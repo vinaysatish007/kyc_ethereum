@@ -48,6 +48,13 @@ contract kyc {
     // list of all valid KYCs
     Request[] public validKYCs;
 
+    // admin address
+    address admin;
+
+    constructor () public {
+        admin = msg.sender;
+    }
+
 
 
     ///////////////////////////////////////////////////////
@@ -185,7 +192,6 @@ contract kyc {
                 return allCustomers[i].rating;
             }
         }
-        return 0;
     }
 
 
@@ -247,6 +253,44 @@ contract kyc {
     ///////////////////////////////////////////////////////
 
 
+    // function to add a bank to the database
+    // @params - bankName, ethaddress of the Bank and regNumber of the bank are passed as parameters
+    // returns 0 if successful
+    // returns 1 if size limit of the database is reached
+    // returns 2 if bank already in network
+    function addBank(string memory bankName, address bankEthAddress, string memory bankRegNumber) public onlyAdmin payable
+    returns (int) {
+        // throw error if username already in use
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (stringsEqual(allBanks[i].name, bankName))
+                return 2;
+        }
+        allBanks.length ++;
+        // throw error if there is overflow in uint
+        if (allBanks.length < 1)
+            return 1;
+        allBanks[allBanks.length - 1] = Organisation(bankName, bankEthAddress, 0, bankRegNumber,
+            0, 0);
+        return 0;
+    }
+    // function to remove fraudulent bank from the database
+    // @params - banks's ethAddress is passed as parameter
+    // returns 0 if successful
+    // returns 1 if Bank not in database
+    function removeBank(address bankEthAddress) public payable onlyAdmin returns (int) {
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (allBanks[i].ethAddress == bankEthAddress) {
+                for (uint j = i + 1; j < allBanks.length; ++j) {
+                    allBanks[i - 1] = allBanks[i];
+                }
+                allCustomers.length --;
+                return 0;
+            }
+        }
+        // throw error if bank ethAddress is not found
+        return 1;
+    }
+
 
 
     ///////////////////////////////////////////////////////
@@ -298,5 +342,10 @@ contract kyc {
                 return false;
         }
         return true;
+    }
+
+    modifier onlyAdmin {
+        require(msg.sender == admin, "Only admin can perform this operation");
+        _;
     }
 }
