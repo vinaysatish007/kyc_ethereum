@@ -13,6 +13,8 @@ contract kyc {
         uint upvotes;
         address bank;
         string password;
+        uint rating;
+        uint rating_count;
     }
     // Struct Organisation
     // name - name of the bank/organisation
@@ -24,6 +26,8 @@ contract kyc {
         address ethAddress;
         uint KYC_count;
         string regNumber;
+        uint rating;
+        uint rating_count;
     }
     // Struct Organisation
     // uname - username of the customer
@@ -56,7 +60,7 @@ contract kyc {
             }
         }
         allRequests.length ++;
-        allRequests[allRequests.length - 1] = Request(Uname, bankAddress, false);
+        allRequests[allRequests.length - 1] = Request(Uname, bankAddress);
     }
     // function to remove request for KYC
     // @Params - Username for the customer
@@ -85,7 +89,7 @@ contract kyc {
             }
         }
         validKYCs.length ++;
-        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress, false);
+        validKYCs[validKYCs.length - 1] = Request(Uname, bankAddress);
     }
     // function to remove from valid KYC
     // @Params - Username for the customer
@@ -137,7 +141,7 @@ contract kyc {
         if (allCustomers.length < 1)
             return 1;
         allCustomers[allCustomers.length - 1] = Customer(Uname, DataHash, 0, msg.sender,
-            "null");
+            "null", 0, 0);
         return 0;
     }
     // function to remove fraudulent customer profile from the database
@@ -184,14 +188,17 @@ contract kyc {
         }
         return "Customer not found in database!";
     }
-    // function to modify customer rating
+
+
+    // function to modify kyc vote
     // @params - Customer Username and a bool variable - true for upvote and false for down vote is passed to the function
     // @return - This function return 0 if it is successful
+    // @return - This function return 1 if Username is not found
     function updateKYCVotes(string memory Uname, bool ifIncrease) public payable returns (uint)
     {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
-                //update rating
+                //update vote
                 if (ifIncrease) {
                     allCustomers[i].upvotes ++;
                     if (allCustomers[i].upvotes > 5) {
@@ -209,4 +216,31 @@ contract kyc {
         }
         return 1;
     }
+
+    // function to modify customer rating
+    // @params - Customer Username and a UserRating from 0 to 10
+    // @return - This function return 0 if it is successful
+    // @return - This function return 1 if Username is not found
+    function updateCustomerRating(string memory Uname, uint Urating) public payable returns (uint)
+    {
+        require(Urating < 11 && Urating >= 0);
+        for (uint i = 0; i < allCustomers.length; ++i) {
+            if (stringsEqual(allCustomers[i].uname, Uname)) {
+                //update rating
+                uint current_rating_count = allCustomers[i].rating_count;
+                uint current_rating = allCustomers[i].rating;
+                allCustomers[i].rating = ((current_rating * current_rating_count) + Urating) / (current_rating_count + 1);
+
+                //update rating count
+                allCustomers[i].rating_count = current_rating_count + 1;
+
+                //return success
+                return 0;
+            }
+        }
+        //return failure
+        return 1;
+    }
+
+
 }
