@@ -175,7 +175,7 @@ contract kyc {
     }
     // function to return latest bank to update the customer data
     // @params - Customer username is passed as the Parameters
-    // @return - This function return the customer data if found, else this function returns 0 address.
+    // @return - This function return the last updated bank ethAddress if found, else this function returns 0 address.
     function viewHistoryForCustomer(string memory Uname) public payable returns (address) {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
@@ -183,9 +183,9 @@ contract kyc {
             }
         }
     }
-    // function to return latest bank to update the customer data
+    // function to return customer rating
     // @params - Customer username is passed as the Parameters
-    // @return - This function return the customer data if found, else this function returns 0.
+    // @return - This function return the customer rating if found, else this function returns 0.
     function viewCustomerRating(string memory Uname) public payable returns (uint) {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
@@ -289,6 +289,37 @@ contract kyc {
         }
         // throw error if bank ethAddress is not found
         return 1;
+    }
+    // function to bank name
+    // @params - bank ethAddress is passed as the Parameters
+    // @return - This function return the bank's name if found, else this function returns error string.
+    function getBankName(address bankEthAddress) public payable returns (string memory) {
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (allBanks[i].ethAddress == bankEthAddress) {
+                return allBanks[i].name;
+            }
+        }
+        return "bank not found";
+    }
+    // function to return bank ethAddress
+    // @params - Bank name is passed as the Parameters
+    // @return - This function return the bank's ethAddress if found, else this function returns 0 address.
+    function getBankAddress(string memory bankName) public payable returns (address) {
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (stringsEqual(allBanks[i].name, bankName)) {
+                return allBanks[i].ethAddress;
+            }
+        }
+    }
+    // function to return bank rating
+    // @params - Bank name is passed as the Parameters
+    // @return - This function return the bank's rating if found, else this function returns 0.
+    function viewBankRating(string memory bankName) public payable returns (uint) {
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (stringsEqual(allBanks[i].name, bankName)) {
+                return allBanks[i].rating;
+            }
+        }
     }
 
 
