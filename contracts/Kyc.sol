@@ -154,7 +154,7 @@ contract kyc {
         if (allCustomers.length < 1)
             return 1;
         allCustomers[allCustomers.length - 1] = Customer(Uname, DataHash, 0, msg.sender,
-            "null", 0, 0);
+            "", 0, 0);
         return 0;
     }
     // function to remove fraudulent customer profile from the database
@@ -193,9 +193,6 @@ contract kyc {
     // function to return customer profile data
     // @params - Customer username is passed as the Parameters and password if required
     // @return - This function return the customer data if found, else this function returns an error string.
-    function viewCustomer(string memory Uname) public payable returns (string memory) {
-        return viewCustomer(Uname, "null");
-    }
     function viewCustomer(string memory Uname, string memory password) public payable returns (string memory) {
         for (uint i = 0; i < allCustomers.length; ++i) {
             if (stringsEqual(allCustomers[i].uname, Uname)) {
@@ -365,6 +362,31 @@ contract kyc {
                 return allBanks[i].rating;
             }
         }
+    }
+    // function to modify bank rating
+    // @params - bank ethAddress and a BankRating from 0 to 10
+    // @return - This function return 0 if it is successful
+    // @return - This function return 1 if bank is not found
+    function updateBankRating(address bankEthAddress, uint bankRating) public payable returns (uint)
+    {
+        require(bankEthAddress != msg.sender);
+        require(bankRating < 11 && bankRating >= 0);
+        for (uint i = 0; i < allBanks.length; ++i) {
+            if (allBanks[i].ethAddress == bankEthAddress) {
+                //update rating
+                uint current_rating_count = allBanks[i].rating_count;
+                uint current_rating = allBanks[i].rating;
+                allBanks[i].rating = ((current_rating * current_rating_count) + bankRating) / (current_rating_count + 1);
+
+                //update rating count
+                allBanks[i].rating_count = current_rating_count + 1;
+
+                //return success
+                return 0;
+            }
+        }
+        //return failure
+        return 1;
     }
 
 
